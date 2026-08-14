@@ -31,8 +31,6 @@ GitHub Action that syncs repository docs into an Actx0 workspace knowledge base.
 
 Outputs: `uploaded`, `replaced`, `skipped`, `failed`.
 
-Tagged versions (`@v1` or `@v1.0.0`) download the GoReleaser binary for the runner OS. `@main` builds from source.
-
 #### CLI
 
 ```zsh
