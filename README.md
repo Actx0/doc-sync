@@ -5,7 +5,7 @@ GitHub Action that syncs repository docs into an Actx0 workspace knowledge base.
 #### GitHub Action
 
 ```yaml
-- uses: Actx0/doc-sync@v1
+- uses: Actx0/doc-sync@v1.0.0
   with:
     workspace_id: ${{ secrets.ACTX0_WORKSPACE_ID }}
     access_key: ${{ secrets.ACTX0_ACCESS_KEY }}

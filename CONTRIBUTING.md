@@ -12,8 +12,6 @@ go build -o doc-sync ./cmd
 goreleaser check
 ```
 
-Push a `v*` tag to publish binaries with GoReleaser.
-
 ## Pull requests
 
 1. Open an issue first for larger changes so we can align on scope.
