@@ -1,6 +1,6 @@
 ### Actx0 Doc Sync
 
-GitHub Action that syncs repository docs into an Actx0 workspace knowledge base using [Gctx0](https://github.com/Actx0/Gctx0). Unchanged files are skipped by checksum; changed files replace the previous document with the same filename and labels.
+GitHub Action that syncs repository docs into an Actx0 workspace knowledge base. Unchanged files are skipped by checksum; changed files replace the previous document with the same filename and labels.
 
 #### GitHub Action
 
