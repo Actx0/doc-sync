@@ -1,0 +1,82 @@
+name: Sync docs to Actx0 knowledge
+description: Upload repository docs to an Actx0 workspace knowledge base, skipping files whose checksum already matches.
+author: Actx0
+branding:
+  icon: book-open
+  color: blue
+
+inputs:
+  workspace_id:
+    description: Actx0 workspace ID
+    required: true
+  access_key:
+    description: Actx0 access key
+    required: true
+  tags:
+    description: "Knowledge labels as a YAML map, one key: value per line"
+    required: false
+    default: ""
+  paths:
+    description: "Files, directories, or globs to sync, one per line. Directories include markdown and text files."
+    required: true
+  repo_dir:
+    description: Repository root used to resolve paths
+    required: false
+    default: ${{ github.workspace }}
+  base_url:
+    description: Actx0 API base URL
+    required: false
+    default: https://app.actx0.com
+  dry_run:
+    description: Compare checksums and print actions without uploading or deleting
+    required: false
+    default: "false"
+
+outputs:
+  uploaded:
+    description: Number of new documents uploaded
+    value: ${{ steps.sync.outputs.uploaded }}
+  replaced:
+    description: Number of documents replaced after a checksum change
+    value: ${{ steps.sync.outputs.replaced }}
+  skipped:
+    description: Number of documents skipped because the checksum already matched
+    value: ${{ steps.sync.outputs.skipped }}
+  failed:
+    description: Number of documents that failed to sync
+    value: ${{ steps.sync.outputs.failed }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Go
+      if: ${{ !startsWith(github.action_ref, 'v') }}
+      uses: actions/setup-go@v5
+      with:
+        go-version-file: ${{ github.action_path }}/go.mod
+        cache-dependency-path: ${{ github.action_path }}/go.sum
+
+    - name: Install doc-sync
+      id: install
+      shell: bash
+      env:
+        DOC_SYNC_REPO: ${{ github.action_repository }}
+        DOC_SYNC_REF: ${{ github.action_ref }}
+        DOC_SYNC_ACTION_PATH: ${{ github.action_path }}
+        DOC_SYNC_BIN: ${{ runner.temp }}/actx0-doc-sync
+        GH_TOKEN: ${{ github.token }}
+      run: bash "${{ github.action_path }}/script/install.sh"
+
+    - name: Sync knowledge
+      id: sync
+      shell: bash
+      env:
+        INPUT_WORKSPACE_ID: ${{ inputs.workspace_id }}
+        INPUT_ACCESS_KEY: ${{ inputs.access_key }}
+        INPUT_TAGS: ${{ inputs.tags }}
+        INPUT_PATHS: ${{ inputs.paths }}
+        INPUT_REPO_DIR: ${{ inputs.repo_dir }}
+        INPUT_BASE_URL: ${{ inputs.base_url }}
+        INPUT_DRY_RUN: ${{ inputs.dry_run }}
+      run: |
+        "${{ steps.install.outputs.bin }}"

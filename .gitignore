@@ -1,0 +1,20 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/doc-sync
+/actx0-doc-sync
+dist/
+
+# Dependency / workspace
+vendor/
+.idea/
+.vscode/
+*.swp
+
+.DS_Store
+.cursor
