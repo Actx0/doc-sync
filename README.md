@@ -21,17 +21,13 @@ GitHub Action that syncs repository docs into an Actx0 workspace knowledge base.
     repo_dir: ${{ github.workspace }}
 ```
 
-| Input | Required | Description |
-| --- | --- | --- |
-| `workspace_id` | yes | Actx0 workspace ID |
-| `access_key` | yes | Actx0 access key |
-| `tags` | no | Knowledge labels as a YAML map (`key: value`, one per line) |
-| `paths` | yes | Files, directories, or globs to sync, one per line. Directories include markdown and text files |
-| `repo_dir` | no | Repository root used to resolve paths. Defaults to `github.workspace` |
-| `base_url` | no | Actx0 API base URL. Defaults to `https://app.actx0.com` |
-| `dry_run` | no | Compare checksums without uploading or deleting |
-
-`paths` accepts a directory (`docs/`), a glob (`docs/*.md` or `docs/**/*.md`), or a specific file (`docs/dd.md`). Directories include `.md`, `.mdx`, `.markdown`, and `.txt` files.
+- `workspace_id` (required) — Actx0 workspace ID
+- `access_key` (required) — Actx0 access key
+- `tags` — knowledge labels, one `key: value` per line
+- `paths` (required) — files, directories, or globs to sync, one per line. Directories include markdown and text files
+- `repo_dir` — repository root used to resolve paths. Defaults to `github.workspace`
+- `base_url` — Actx0 API base URL. Defaults to `https://app.actx0.com`
+- `dry_run` — compare checksums without uploading or deleting
 
 Outputs: `uploaded`, `replaced`, `skipped`, `failed`.
 
