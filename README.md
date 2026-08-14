@@ -39,7 +39,7 @@ Tagged versions (`@v1` or `@v1.0.0`) download the GoReleaser binary for the runn
 
 #### CLI
 
-```bash
+```zsh
 go install github.com/Actx0/doc-sync/cmd/doc-sync@latest
 
 doc-sync \
@@ -57,7 +57,7 @@ Release binaries are published by GoReleaser when a `v*` tag is pushed.
 
 #### Development
 
-```bash
+```zsh
 go test ./...
 go build -o doc-sync ./cmd/doc-sync
 goreleaser check
