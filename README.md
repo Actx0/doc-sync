@@ -34,9 +34,9 @@ Outputs: `uploaded`, `replaced`, `skipped`, `failed`.
 #### CLI
 
 ```zsh
-go install github.com/Actx0/doc-sync/cmd/doc-sync@latest
+go build -o doc-sync ./cmd
 
-doc-sync \
+./doc-sync \
   --workspace-id "$ACTX0_WORKSPACE_ID" \
   --access-key "$ACTX0_ACCESS_KEY" \
   --tags $'tag: docs\nteam: platform\nrepo: actx0/app' \
@@ -53,6 +53,6 @@ Release binaries are published by GoReleaser when a `v*` tag is pushed.
 
 ```zsh
 go test ./...
-go build -o doc-sync ./cmd/doc-sync
+go build -o doc-sync ./cmd
 goreleaser check
 ```

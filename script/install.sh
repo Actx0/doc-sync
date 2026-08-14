@@ -80,7 +80,7 @@ else
 		echo "go is required to build doc-sync from ${ref:-source}" >&2
 		exit 1
 	}
-	(cd "${action_path}" && go build -ldflags "-s -w" -o "${dest}" ./cmd/doc-sync)
+	(cd "${action_path}" && go build -ldflags "-s -w" -o "${dest}" ./cmd)
 fi
 
 chmod +x "${dest}"

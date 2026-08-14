@@ -106,3 +106,12 @@ func TestTitleFromFilename(t *testing.T) {
 	assert.Equal(t, "docs/getting started", TitleFromFilename("docs/getting-started.md"))
 	assert.Equal(t, "docs/dd", TitleFromFilename("docs/dd.md"))
 }
+
+func TestWriteGitHubOutput(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "output")
+	err := WriteGitHubOutput(path, &Result{Uploaded: 1, Replaced: 2, Skipped: 3, Failed: 0})
+	require.NoError(t, err)
+	body, err := os.ReadFile(path)
+	require.NoError(t, err)
+	assert.Equal(t, "uploaded=1\nreplaced=2\nskipped=3\nfailed=0\n", string(body))
+}

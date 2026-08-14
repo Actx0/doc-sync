@@ -8,7 +8,7 @@ Thanks for your interest in contributing to the Actx0 docs sync GitHub Action.
 git clone https://github.com/Actx0/doc-sync.git
 cd doc-sync
 go test ./...
-go build -o doc-sync ./cmd/doc-sync
+go build -o doc-sync ./cmd
 goreleaser check
 ```
 
