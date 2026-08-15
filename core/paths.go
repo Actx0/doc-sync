@@ -121,12 +121,43 @@ func RelFilename(repoDir, absPath string) (string, error) {
 	return filepath.ToSlash(rel), nil
 }
 
+// DocumentName is the filename Actx0 stores (basename only).
+func DocumentName(filename string) string {
+	return filepath.ToSlash(filepath.Base(filename))
+}
+
 func TitleFromFilename(filename string) string {
 	name := strings.TrimSuffix(filename, filepath.Ext(filename))
 	name = strings.ReplaceAll(name, "\\", "/")
 	name = strings.ReplaceAll(name, "_", " ")
 	name = strings.ReplaceAll(name, "-", " ")
 	return strings.TrimSpace(name)
+}
+
+func uniqueBasenames(repoDir string, files []string) error {
+	grouped := map[string][]string{}
+	for _, abs := range files {
+		rel, err := RelFilename(repoDir, abs)
+		if err != nil {
+			rel = abs
+		}
+		name := DocumentName(rel)
+		grouped[name] = append(grouped[name], rel)
+	}
+
+	var conflicts []string
+	for name, paths := range grouped {
+		if len(paths) < 2 {
+			continue
+		}
+		sort.Strings(paths)
+		conflicts = append(conflicts, fmt.Sprintf("%s (%s)", name, strings.Join(paths, ", ")))
+	}
+	if len(conflicts) == 0 {
+		return nil
+	}
+	sort.Strings(conflicts)
+	return fmt.Errorf("duplicate filenames: %s", strings.Join(conflicts, "; "))
 }
 
 func ContentType(filename string) string {

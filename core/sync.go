@@ -93,7 +93,7 @@ func indexRemote(docs []gctx0.Document, labels map[string]string) map[string][]g
 	matched := lo.Filter(docs, func(doc gctx0.Document, _ int) bool {
 		return labelsEqual(doc.Labels, labels)
 	})
-	return lo.GroupBy(matched, func(doc gctx0.Document) string { return doc.Filename })
+	return lo.GroupBy(matched, func(doc gctx0.Document) string { return DocumentName(doc.Filename) })
 }
 
 func encodeLabels(labels map[string]string) []string {
@@ -140,6 +140,9 @@ func Sync(ctx context.Context, client Knowledge, cfg Config, out io.Writer) (*Re
 	if len(files) == 0 {
 		return nil, fmt.Errorf("no documents found")
 	}
+	if err := uniqueBasenames(repoDir, files); err != nil {
+		return nil, err
+	}
 
 	remote, err := listAll(ctx, client)
 	if err != nil {
@@ -163,9 +166,10 @@ func Sync(ctx context.Context, client Knowledge, cfg Config, out io.Writer) (*Re
 		}
 		fmt.Fprintln(out, formatFileResult(item))
 		if item.Action != ActionError && item.Filename != "" {
-			byName[item.Filename] = []gctx0.Document{{
+			name := DocumentName(item.Filename)
+			byName[name] = []gctx0.Document{{
 				ID:       item.ID,
-				Filename: item.Filename,
+				Filename: name,
 				Checksum: item.Checksum,
 				Labels:   encodeLabels(labels),
 			}}
@@ -197,8 +201,9 @@ func syncFile(
 
 	checksum := gctx0.FileChecksum(content)
 	item := FileResult{Path: absPath, Filename: filename, Checksum: checksum}
+	name := DocumentName(filename)
 
-	matching, extra := lo.FilterReject(byName[filename], func(doc gctx0.Document, _ int) bool {
+	matching, extra := lo.FilterReject(byName[name], func(doc gctx0.Document, _ int) bool {
 		return doc.Checksum == checksum
 	})
 	if len(matching) > 0 {
@@ -226,7 +231,7 @@ func syncFile(
 	}
 
 	uploaded, err := client.Upload(ctx, gctx0.PreparedFile{
-		Filename:    filename,
+		Filename:    name,
 		Content:     content,
 		ContentType: ContentType(filename),
 	}, TitleFromFilename(filename), labels)

@@ -60,9 +60,9 @@ func TestSyncChecksums(t *testing.T) {
 	same := gctx0.FileChecksum([]byte("dd"))
 	stale := gctx0.FileChecksum([]byte("old"))
 	client := &fakeKnowledge{docs: []gctx0.Document{
-		{ID: "doc_dd", Filename: "docs/dd.md", Checksum: same, Labels: []string{"tag=docs"}},
-		{ID: "doc_old", Filename: "docs/ree.md", Checksum: stale, Labels: []string{"tag=docs"}},
-		{ID: "doc_other", Filename: "docs/dd.md", Checksum: same, Labels: []string{"team=other"}},
+		{ID: "doc_dd", Filename: "dd.md", Checksum: same, Labels: []string{"tag=docs"}},
+		{ID: "doc_old", Filename: "ree.md", Checksum: stale, Labels: []string{"tag=docs"}},
+		{ID: "doc_other", Filename: "dd.md", Checksum: same, Labels: []string{"team=other"}},
 	}}
 
 	var buf bytes.Buffer
@@ -86,6 +86,48 @@ func TestSyncChecksums(t *testing.T) {
 	assert.Contains(t, buf.String(), "skip    docs/dd.md")
 	assert.Contains(t, buf.String(), "replace docs/ree.md")
 	assert.True(t, labelsEqual([]string{"tag=docs"}, labels))
+}
+
+func TestSyncSkipsBasenameRemote(t *testing.T) {
+	root := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(root, "docs", "guides"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "docs", "guides", "onboarding.md"), []byte("hello"), 0o644))
+
+	same := gctx0.FileChecksum([]byte("hello"))
+	client := &fakeKnowledge{docs: []gctx0.Document{
+		{ID: "doc_1", Filename: "onboarding.md", Checksum: same, Labels: []string{"tag=docs"}},
+		{ID: "doc_2", Filename: "onboarding.md", Checksum: same, Labels: []string{"tag=docs"}},
+	}}
+
+	result, err := Sync(context.Background(), client, Config{
+		WorkspaceID: "ws",
+		AccessKey:   "key",
+		Tags:        "tag: docs",
+		Paths:       []string{"docs/guides/onboarding.md"},
+		RepoDir:     root,
+	}, nil)
+	require.NoError(t, err)
+	assert.Equal(t, 1, result.Skipped)
+	assert.Equal(t, 0, result.Uploaded)
+	assert.Equal(t, 0, client.uploads)
+	assert.Equal(t, []string{"doc_2"}, client.deletes)
+	assert.Equal(t, "doc_1", result.Files[0].ID)
+}
+
+func TestSyncDuplicateBasenames(t *testing.T) {
+	root := t.TempDir()
+	require.NoError(t, os.MkdirAll(filepath.Join(root, "docs", "a"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(root, "docs", "b"), 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "docs", "a", "notes.md"), []byte("a"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(root, "docs", "b", "notes.md"), []byte("b"), 0o644))
+
+	_, err := Sync(context.Background(), &fakeKnowledge{}, Config{
+		WorkspaceID: "ws",
+		AccessKey:   "key",
+		Paths:       []string{"docs/"},
+		RepoDir:     root,
+	}, nil)
+	require.ErrorContains(t, err, "duplicate filenames: notes.md")
 }
 
 func TestSyncDryRun(t *testing.T) {

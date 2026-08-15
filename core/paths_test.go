@@ -107,6 +107,11 @@ func TestTitleFromFilename(t *testing.T) {
 	assert.Equal(t, "docs/dd", TitleFromFilename("docs/dd.md"))
 }
 
+func TestDocumentName(t *testing.T) {
+	assert.Equal(t, "onboarding.md", DocumentName("docs/guides/onboarding.md"))
+	assert.Equal(t, "onboarding.md", DocumentName("onboarding.md"))
+}
+
 func TestWriteGitHubOutput(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "output")
 	err := WriteGitHubOutput(path, &Result{Uploaded: 1, Replaced: 2, Skipped: 3, Failed: 0})
